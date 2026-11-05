@@ -10,7 +10,8 @@ export type PeriodFilter = 'all' | 'today' | '3days' | 'week';
 export interface IncidentFilters {
   query: string;                    // адрес
   org: string;                      // название любой ответственной организации
-  uprava: string;                   // 'all' или номер управы
+  uprava: string;                   // 'all' или номер управы (старое поле)
+  upravas: number[];                // выбранные управы; пусто — все
   status: 'all' | IncidentStatus;
   period: PeriodFilter;
 }
@@ -20,7 +21,7 @@ interface FilterStore extends IncidentFilters {
   reset: () => void;
 }
 
-const EMPTY: IncidentFilters = { query: '', org: '', uprava: 'all', status: 'all', period: 'all' };
+const EMPTY: IncidentFilters = { query: '', org: '', uprava: 'all', upravas: [], status: 'all', period: 'all' };
 
 export const useFilterStore = create<FilterStore>((set) => ({
   ...EMPTY,
@@ -44,7 +45,9 @@ export function filterIncidents(
     if (org && !incident.responsibles.some((r) => r.organization.name.toLowerCase().includes(org))) {
       return false;
     }
-    if (f.uprava !== 'all' && incident.location.upravaId !== Number(f.uprava)) return false;
+    // Мультивыбор управ: пустой список — все управы.
+    if (f.upravas.length && !f.upravas.includes(incident.location.upravaId)) return false;
+    if (!f.upravas.length && f.uprava !== 'all' && incident.location.upravaId !== Number(f.uprava)) return false;
     if (!options.ignoreStatus && f.status !== 'all' && incident.status !== f.status) return false;
 
     if (f.period !== 'all') {
@@ -60,7 +63,10 @@ export function filterIncidents(
 }
 
 export function hasActiveFilters(f: IncidentFilters): boolean {
-  return Boolean(f.query || f.org || f.uprava !== 'all' || f.status !== 'all' || f.period !== 'all');
+  return Boolean(
+    f.query || f.org || f.uprava !== 'all' || f.upravas.length ||
+    f.status !== 'all' || f.period !== 'all',
+  );
 }
 
 // Отфильтрованный список. ignoreStatus — для счётчиков по статусам: они
@@ -70,12 +76,13 @@ export function useFilteredIncidents(options: { ignoreStatus?: boolean } = {}): 
   const query = useFilterStore((s) => s.query);
   const org = useFilterStore((s) => s.org);
   const uprava = useFilterStore((s) => s.uprava);
+  const upravas = useFilterStore((s) => s.upravas);
   const status = useFilterStore((s) => s.status);
   const period = useFilterStore((s) => s.period);
   const ignoreStatus = options.ignoreStatus ?? false;
   // Мемо: карта перерисовывает маркеры только при реальной смене списка
   return useMemo(
-    () => filterIncidents(incidents, { query, org, uprava, status, period }, { ignoreStatus }),
-    [incidents, query, org, uprava, status, period, ignoreStatus],
+    () => filterIncidents(incidents, { query, org, uprava, upravas, status, period }, { ignoreStatus }),
+    [incidents, query, org, uprava, upravas, status, period, ignoreStatus],
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, MapPin } from 'lucide-react';
+import { X, MapPin, Building2 } from 'lucide-react';
 import type { UserRole } from '@/entities/user/types';
+import { cityOfUprava, useAreas } from '@/entities/area/model/areas';
 import { STATUS_META } from '../../lib/presentation';
 import { StatusTag } from '../StatusTag';
 import { useCardModel, sourceLine } from './cardModel';
@@ -29,10 +30,15 @@ const Section: React.FC<{ title: string; aside?: React.ReactNode; children: Reac
 
 export const DispatchCard: React.FC<{ role: UserRole }> = ({ role }) => {
   const m = useCardModel();
+  const areas = useAreas();
   if (!m.incident) return null;
   const inc = m.incident;
   const tone = STATUS_META[inc.status].dot;
   const repeats = m.primary?.recidivismCount ?? 0;
+  // Управа — по номеру из заявки; 0 означает «не определена» (адрес вне контуров)
+  const uprava = Number(inc.location.upravaId) || 0;
+  const upravaCity = uprava ? cityOfUprava(areas, uprava) : null;
+  const upravaText = uprava ? `Управа № ${uprava}${upravaCity ? ` (${upravaCity})` : ''}` : 'Управа не определена';
 
   return (
     <article className="flex h-full min-h-0 flex-col overflow-hidden">
@@ -59,7 +65,14 @@ export const DispatchCard: React.FC<{ role: UserRole }> = ({ role }) => {
           <MapPin className="mt-1 size-4 shrink-0 text-primary" />
           {inc.location.address}
         </h2>
-        <p className="font-num m-0 mt-1 text-[12px] text-muted-foreground">{sourceLine(inc)}</p>
+        <p className="m-0 mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
+          {/* Управа — тот же номер, по которому работает фильтр карты */}
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--inset)] px-1.5 py-0.5 ring-1 ring-border">
+            <Building2 className="size-3 shrink-0 text-primary" aria-hidden />
+            {upravaText}
+          </span>
+          <span className="font-num">{sourceLine(inc)}</span>
+        </p>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 pb-5">
