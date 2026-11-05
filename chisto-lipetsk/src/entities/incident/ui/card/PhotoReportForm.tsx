@@ -45,7 +45,11 @@ export const PhotoReportForm: React.FC<{
       photoUrl: url,
       takenAt: at,
       coords: coords ?? undefined,
-      distanceM: coords ? distanceM(coords, incident.location.coordinates) : undefined,
+      // У адреса может не быть геометки — тогда расстояние до площадки не считаем
+      distanceM:
+        coords && incident.location.coordinates
+          ? distanceM(coords, incident.location.coordinates)
+          : undefined,
     };
     await onSubmit(report);
     setBusy(false);

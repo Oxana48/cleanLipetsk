@@ -28,6 +28,8 @@ export function useIncidentMarkers(mapReady: boolean, mapRef: React.RefObject<L.
     );
 
     ordered.forEach((incident) => {
+      // Адрес без координат: метку поставить некуда — иначе она уехала бы в точку 0, 0
+      if (!incident.location.coordinates) return;
       const isSelected = selectedIncident?.id === incident.id;
       const markerElement = createMarkerElement(
         incident.status,
