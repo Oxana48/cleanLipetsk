@@ -12,6 +12,7 @@ import { StatusIcon } from '@/entities/incident/ui/StatusIcon';
 import { DispatchCard } from '@/entities/incident/ui/card/DispatchCard';
 import { useNow, timeAgo, timeLeft } from '@/shared/lib/time';
 import { MapRadar } from '@/widgets/map-radar';
+import { AreasFilter } from '@/entities/area/ui/AreasFilter';
 import { ROLE_TITLE, initials, type AppTab, APP_TABS, useUrlState } from './shared';
 
 // Аналитика с графиками (recharts) грузится, только когда её открыли
@@ -256,7 +257,7 @@ const LeftPanel: React.FC = () => {
           <h2 className="eyebrow m-0 flex items-center gap-2 !text-foreground/80">
             <Radio className="size-3.5 text-primary" /> Обстановка
           </h2>
-          <span className="font-num text-[11px] text-muted-foreground">Липецк · 19 управ</span>
+          <AreasFilter />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Kpi label="Открыто" value={summary.open} sub={`+${fresh24} за сутки`} />
