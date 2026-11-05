@@ -7,6 +7,17 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Правка интеграции (см. project/dispatch/patches): ссылка назад в сервис
+         документов. Интерфейсы живут на одном адресе, поэтому она ведёт в /ui. -->
+    <a
+      href="/ui"
+      style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:6px 10px;border-radius:8px;
+             background:rgba(0,0,0,.55);color:#fff;font:13px/1.2 system-ui,sans-serif;
+             text-decoration:none;opacity:.75"
+      onmouseover="this.style.opacity='1'"
+      onmouseout="this.style.opacity='.75'"
+      >← Сервис документов</a
+    >
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
